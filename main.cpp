@@ -52,15 +52,15 @@ void gameInit()
 }
 void updateWindow()
 {
-	BeginBatchDraw();
+	BeginBatchDraw();//开始缓冲
 	putimage(0, 0, &imgBg);//渲染图片，打印到界面上
 	putimagePNG(250, 0, &imBar);//渲染图片，把卡槽打印到界面上
+	//渲染植物
 	for (int i = 0; i < ZHI_WU_COUNT; i++) {
 		int x = 315 + i*60;
 		int y = 0;
 		putimagePNG(x, y, &imCards[i]);
 	}
-	//渲染植物
 	if (curzhiwu > 0){
 		IMAGE* img = imzhiwu[curzhiwu - 1][0];
 		putimagePNG(curX-img->getwidth()/2, curY-img->getwidth()/2, img);
@@ -77,7 +77,7 @@ void updateWindow()
 		}
 	}
 
-	EndBatchDraw();
+	EndBatchDraw();//结束缓冲
 }
 void userClick() {
 	ExMessage msg;
@@ -111,12 +111,40 @@ void userClick() {
 	}
 }
 
+void updateGame() {
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 9; j++) {
+			if (map[i][j].type > 0) {
+				map[i][j].frameIndex++;
+				int zhiwuType = map[i][j].type - 1;
+				int index = map[i][j].frameIndex;
+				if (imzhiwu[zhiwuType][index] == NULL) {
+					map[i][j].frameIndex = 0;
+				}
+			}
+		}
+	}
+}
+void startUI() {
+
+}
+int timer = 0;
+bool flag = true;
 int main(void)
 {
 	gameInit();
 	while (1) {
 		userClick();
-		updateWindow();
+		timer += getDelay();
+		if (timer > 80) {
+			flag = true;
+			timer = 0;
+		}
+		if (flag) {
+			flag = false;
+			updateWindow();
+			updateGame();
+		}
 
 	}
 	system("pause");
